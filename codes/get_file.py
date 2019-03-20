@@ -4,9 +4,17 @@
 # 2019-Mar (CC BY 3.0 BR)                               #
 
 import json
+import os
+import time
 
+import numpy as np
 import pandas as pd
 import requests
+from geopy.extra.rate_limiter import RateLimiter
+from geopy.geocoders import Nominatim
+
+import folium
+import sqlalchemy
 
 URL = 'https://power.larc.nasa.gov/cgi-bin/v1/DataAccess.py?request=execute&userCommunity=SSE&outputList=CSV'
 
@@ -42,9 +50,6 @@ def get_file(parameters, identifier, tempAverage):
     finally:
         print(f'Status code: {r.status_code}')
 
-        
-import numpy as np
-
 
 def clean_arrange(funcao_get_file, parameters='ALLSKY_SFC_SW_DWN',
                   identifier='Global', tempAverage='CLIMATOLOGY',
@@ -76,13 +81,8 @@ def clean_arrange(funcao_get_file, parameters='ALLSKY_SFC_SW_DWN',
 
     return dataset
 
+
 dataset = clean_arrange(get_file)
-
-
-import time
-
-from geopy.extra.rate_limiter import RateLimiter
-from geopy.geocoders import Nominatim
 
 
 def escreve_csv(lista):
@@ -149,9 +149,6 @@ query = """
 """
 
 
-import sqlalchemy
-
-
 def insert_data(user, password, query='', db='solar_nasa', table='global'):
     """
     Insert the data in a MySQL database.
@@ -184,7 +181,7 @@ def insert_data(user, password, query='', db='solar_nasa', table='global'):
     finally:
         engine.dispose()
 
- 
+
 insert_data(user='root', password=1984, query=query)
 
 
@@ -217,11 +214,9 @@ def select_data(fields, tables, user, password, where=None,
         engine.dispose()
 
 
-state_data = select_data(fields='state, media', tables='global', where='country="Brasil"', user='root', password=1984)
+state_data = select_data(fields='state, media', tables='global',
+                         where='country="Brasil"', user='root', password=1984)
 
-import os
-
-import folium
 
 state_geo = os.path.join('br-states.json')
 
